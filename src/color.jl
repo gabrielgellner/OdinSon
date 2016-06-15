@@ -1,4 +1,4 @@
-using Colors
+import Colors: RGB, red, green, blue, parse, Colorant
 import PyCall: @pyimport, PyObject
 @pyimport cycler
 import PyPlot: plt
@@ -29,3 +29,19 @@ end
 #TODO: add RGBA versions
 
 # string color names
+# the order will matter ... or maybe I should have it return multiple
+color_defs = [svg_rgb, crayons, xkcd_rgb]
+
+function parse_cstring(name::ASCIIString)
+    for def in color_defs
+        if haskey(def, name)
+            return parse(Colorant, def[name])
+        end
+    end
+    throw(ArgumentError("Not a Color name: $name"))
+end
+
+macro C_str(name::ASCIIString)
+    c = parse_cstring(name)
+    return :( $c )
+end
