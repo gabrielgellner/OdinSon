@@ -1,4 +1,5 @@
-using PyCall
+using Colors
+import PyCall: @pyimport, PyObject
 @pyimport cycler
 import PyPlot: plt
 
@@ -15,3 +16,15 @@ function set_palette(name::Symbol)
     colprop = cycler.cycler("color", SEABORN_PALETTES[name])
     plt[:rc]("axes", prop_cycle=colprop)
 end
+
+# I need a way to convert the types from Colors.jl (RGB{8}(r, g, b) -> python tuple)
+# this code is directly from PyCall.jl -> conversions.jl for tuple conversion
+function PyObject(t::RGB)
+    ctup = map(float, (red(t), green(t), blue(t)))
+    o = PyObject(ctup)
+    return o
+end
+
+#TODO: add RGBA versions
+
+# string color names
