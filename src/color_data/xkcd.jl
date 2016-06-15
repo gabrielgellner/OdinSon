@@ -1,4 +1,4 @@
-xkcd_rgb = Dict(
+const xkcd_rgb = Dict(
     "acid green"=> "#8ffe09",
     "adobe"=> "#bd6c48",
     "algae"=> "#54ac68",
@@ -764,8 +764,8 @@ xkcd_rgb = Dict(
     "rich blue"=> "#021bf9",
     "rich purple"=> "#720058",
     "robin egg blue"=> "#8af1fe",
-    "robin"s egg"=> "#6dedfd",
-    "robin"s egg blue"=> "#98eff9",
+    "robin's egg"=> "#6dedfd",
+    "robin's egg blue"=> "#98eff9",
     "rosa"=> "#fe86a4",
     "rose"=> "#cf6275",
     "rose pink"=> "#f7879a",

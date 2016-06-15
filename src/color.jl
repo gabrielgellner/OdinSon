@@ -11,6 +11,7 @@ SEABORN_PALETTES = Dict(
     :colorblind => ["#0072B2", "#009E73", "#D55E00", "#CC79A7", "#F0E442", "#56B4E9"]
 )
 
+#this needs a more a more julian name something like style!, palette!
 function set_palette(name::Symbol)
     colprop = cycler.cycler("color", SEABORN_PALETTES[name])
     plt[:rc]("axes", prop_cycle=colprop)

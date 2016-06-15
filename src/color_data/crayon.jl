@@ -1,6 +1,6 @@
 #TODO: think about strings vs symbols here ... I might want to use symbols to be more
 # consistent
-crayons = Dict(
+const crayons = Dict(
     "Almond"=> "#EFDECD",
     "Antique Brass"=> "#CD9575",
     "Apricot"=> "#FDD9B5",
@@ -78,7 +78,7 @@ crayons = Dict(
     "Pink Sherbert"=> "#F78FA7",
     "Plum"=> "#8E4585",
     "Purple Heart"=> "#7442C8",
-    "Purple Mountains" Majesty"=> "#9D81BA",
+    "Purple Mountains Majesty"=> "#9D81BA",
     "Purple Pizzazz"=> "#FE4EDA",
     "Radical Red"=> "#FF496C",
     "Raw Sienna"=> "#D68A59",
@@ -87,11 +87,11 @@ crayons = Dict(
     "Red"=> "#EE204D",
     "Red Orange"=> "#FF5349",
     "Red Violet"=> "#C0448F",
-    "Robin"s Egg Blue"=> "#1FCECB",
+    "Robin's Egg Blue"=> "#1FCECB",
     "Royal Purple"=> "#7851A9",
     "Salmon"=> "#FF9BAA",
     "Scarlet"=> "#FC2847",
-    "Screamin" Green"=> "#76FF7A",
+    "Screamin' Green"=> "#76FF7A",
     "Sea Green"=> "#93DFB8",
     "Sepia"=> "#A5694F",
     "Shadow"=> "#8A795D",
