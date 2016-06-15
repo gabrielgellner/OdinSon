@@ -4,14 +4,14 @@
 
 # axes style
 type AxesStyle
-    linewidth::Real
+    stroke_width::Real # linewidth
+    stroke::RGB # edgecolor
     #grid
     #facecolor::Color
-    #edgecolor::Color
     #labelcolor::Color
     #axisbelow
-    function AxesStyle(;linewidth, grid, facecolor, edgecolor, axisbelow, labelcolor)
-        AxesStyle(linewidth)
+    function AxesStyle(;stroke_width, stroke)
+        AxesStyle(stroke_width, stroke)
     end
 end
 

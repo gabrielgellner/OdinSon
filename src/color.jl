@@ -12,9 +12,11 @@ SEABORN_PALETTES = Dict(
     :colorblind => ["#0072B2", "#009E73", "#D55E00", "#CC79A7", "#F0E442", "#56B4E9"]
 )
 
+color_cycle(carr::AbstractArray) = cycler.cycler("color", carr)
+
 #this needs a more a more julian name something like style!, palette!
 function set_palette(name::Symbol)
-    colprop = cycler.cycler("color", SEABORN_PALETTES[name])
+    colprop = color_cycle(SEABORN_PALETTES[name])
     plt[:rc]("axes", prop_cycle=colprop)
 end
 
@@ -41,7 +43,15 @@ function parse_cstring(name::ASCIIString)
     throw(ArgumentError("Not a Color name: $name"))
 end
 
-macro C_str(name::ASCIIString)
+#NC for Named Color
+macro NC_str(name::ASCIIString)
     c = parse_cstring(name)
     return :( $c )
+end
+
+#HC for Hex Color
+macro HC_str(hexstr::ASCIIString)
+    #TODO: test to ensure actually a hex string
+    c = parse(Colorant, hexstr)
+    return :($c)
 end

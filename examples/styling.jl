@@ -2,10 +2,12 @@ using OdinSon
 using Colors
 using PyPlot
 
-style(axes=AxesStyle(stroke_width=0.8, stroke=C"red"))
+style(axes=AxesStyle(stroke_width=0.8, stroke=NC"red"))
 
-C"Almond"
+NC"Almond"
 
-C"Red"
+NC"Red"
 
-C"red"
+NC"red"
+
+HC"#FF00AA"
