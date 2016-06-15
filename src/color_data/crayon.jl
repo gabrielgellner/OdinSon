@@ -1,6 +1,5 @@
-#TODO: think about strings vs symbols here ... I might want to use symbols to be more
-# consistent
-const crayons = Dict(
+#TODO: I want strings, so then I can do a string macro to return the colortype
+crayons = Dict(
     "Almond"=> "#EFDECD",
     "Antique Brass"=> "#CD9575",
     "Apricot"=> "#FDD9B5",
