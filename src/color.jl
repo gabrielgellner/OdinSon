@@ -1,4 +1,4 @@
-import Colors: RGB, red, green, blue, parse, Colorant
+import Colors: Colorant, Color, RGB, red, green, blue, parse, convert
 import PyCall: @pyimport, PyObject
 @pyimport cycler
 import PyPlot: plt
@@ -22,8 +22,9 @@ end
 
 # I need a way to convert the types from Colors.jl (RGB{8}(r, g, b) -> python tuple)
 # this code is directly from PyCall.jl -> conversions.jl for tuple conversion
-function PyObject(t::RGB)
-    ctup = map(float, (red(t), green(t), blue(t)))
+function PyObject(t::Color)
+    trgb = convert(RGB, t)
+    ctup = map(float, (red(trgb), green(trgb), blue(trgb)))
     o = PyObject(ctup)
     return o
 end
