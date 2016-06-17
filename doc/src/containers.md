@@ -12,7 +12,7 @@ So we have the following names for the root object:
 * Mathematica: Graphics
 * Vega.js: scene (I think, it seems largely implicit)
 * Compose: Context
-* Grid: viewPort (the default one made that covers the entire device)
+* Grid: viewport (the default one made that covers the entire device)
 
 I am tempted to use `Canvas` as it feels the most general (though `Graphics` also seems
 decent, I just don't love the plural nature of it. I think it is worth distinguishing
@@ -40,15 +40,15 @@ Grid and depend on if the Axes is added to another Axes or the top level Figure.
 So axes seems pretty common. For some reason I don't love the name. I think of the axes as
 being the a synonym for the "spines" or "scales", the visual representation of the
 co-ordinates not the container. This seems to be the view taken by Grid, which uses axes
-to mean the spines as well. Maybe I use ViewPort, it has a nice feel to it. And even though
+to mean the spines as well. Maybe I use Viewport, it has a nice feel to it. And even though
 it might be a little confusing with the concept from SVG, as there is not conflicting
 attribute name in the SVG spec I think I am fine.
 
 ## Conclusions
-I will have the hierarchy root(Canvas) -many-> leaf(ViewPort) -many-> leaf(ViewPort). If no
-ViewPort is given in the Canvas item list, then a default one will be created. I can then
+I will have the hierarchy root(Canvas) -many-> leaf(Viewport) -many-> leaf(Viewport). If no
+Viewport is given in the Canvas item list, then a default one will be created. I can then
 have a Grid container that will do what Matplotlib does with a GridSpec, which will contain
-a Grid of aligned ViewPorts.
+a Grid of aligned Viewport's.
 
 ## Styling
 
