@@ -15,6 +15,7 @@ export @NC_str, @HC_str, HSV, RGB
 
 # Basic SVG/Mathematica like language
 include("shapes.jl")
+export Point
 export Canvas, Style, PolyLine, Polygon, Circle, render
 
 end # module

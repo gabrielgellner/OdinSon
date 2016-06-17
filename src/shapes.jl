@@ -6,11 +6,35 @@ import PyPlot: subplots
 @pyimport matplotlib.collections as mcol
 @pyimport matplotlib.lines as mlines
 
+type Style
+    stroke::RGB
+    stroke_width::Float64
+    fill::RGB # should also be able to be some kind of none, for not filled
+    fill_opacity::Float64 # should check for being between 0-1
+    function Style(;stroke=NC"black", stroke_width=1.0, fill=NC"white", fill_opacity=1.0)
+        new(stroke, stroke_width, fill, fill_opacity)
+    end
+end
+
+# keywords for matplotlib patches are uniform
+function style2kw(s::Style)
+    Dict(:edgecolor => s.stroke, :linewidth => s.stroke_width, :facecolor => s.fill, :alpha => s.fill_opacity)
+end
+
+# keyworks for Line2D are different than patches
+function style2kw_l(s::Style)
+    Dict(:color => s.stroke, :linewidth => s.stroke_width)
+end
+
 # make the base shape types
 abstract Grob
 
 type Canvas <: Grob
     grobs::AbstractArray
+    style::Style
+    function Canvas(grobs; style=Style(fill=NC"white"))
+        new(grobs, style)
+    end
 end
 
 function render(go::Canvas)
@@ -21,6 +45,8 @@ function render(go::Canvas)
     # using collections removes all styling, style must be passed into the PatchCollection
     #pcol = mcol.PatchCollection(patches)
     (fig, ax) = subplots()
+    # apply style to axes
+    ax[:patch][:set_facecolor](go.style.fill)
     for p in patches
         # assume that we have either lines or patches
         if pyisinstance(p, mlines.Line2D)
@@ -31,26 +57,8 @@ function render(go::Canvas)
     end
     ax[:relim]() # resize the axes limits
     ax[:autoscale_view]() # make sure everyting is visable
+    ax[:set_aspect]("equal") # TODO: make this an option
     return fig
-end
-
-type Style
-    stroke::RGB
-    stroke_width::Real
-    fill::RGB # should also be able to be some kind of none, for not filled
-    function Style(;stroke=NC"black", stroke_width=1.0, fill=NC"white")
-        new(stroke, stroke_width, fill)
-    end
-end
-
-# keywords for matplotlib patches are uniform
-function style2kw(s::Style)
-    Dict(:edgecolor => s.stroke, :linewidth => s.stroke_width, :facecolor => s.fill)
-end
-
-# keyworks for Line2D are different than patches
-function style2kw_l(s::Style)
-    Dict(:color => s.stroke, :linewidth => s.stroke_width)
 end
 
 type Point
