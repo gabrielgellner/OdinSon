@@ -1,5 +1,6 @@
 using OdinSon
 
+Polygon([1 2 3; 3 4 5])
 render(PolyLine(Array[[1, 2], [3, 4], [5, 6]]))
 
 diagram = Canvas([Circle([0, 0], 1), Circle([1, 1], 0.5, style=Style(fill=NC"violet", stroke_width=2))])

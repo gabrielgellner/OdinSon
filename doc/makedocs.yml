@@ -1,0 +1,11 @@
+site_name: OdinSon.jl Docs
+site_author: Gabriel Gellner
+repo_url: https://github.com/gabrielgellner/OdinSon
+theme: readthedocs
+markdown_extensions:
+    - markdown_include.include:
+
+pages:
+    - Home: 'index.md'
+    - Basic Shapes:
+        - 'Specifying Points': 'points.md'

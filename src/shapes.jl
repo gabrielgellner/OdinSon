@@ -7,9 +7,9 @@ import PyPlot: subplots
 @pyimport matplotlib.lines as mlines
 
 type Style
-    stroke::RGB
+    stroke::Union{RGB, Symbol} # can I make sure only :none is allowed?
     stroke_width::Float64
-    fill::RGB # should also be able to be some kind of none, for not filled
+    fill::Union{RGB, Symbol} # should also be able to be some kind of none, for not filled
     fill_opacity::Float64 # should check for being between 0-1
     function Style(;stroke=NC"black", stroke_width=1.0, fill=NC"white", fill_opacity=1.0)
         new(stroke, stroke_width, fill, fill_opacity)
@@ -29,8 +29,8 @@ end
 # make the base shape types
 abstract Grob
 
-type Canvas <: Grob
-    grobs::AbstractArray
+type Canvas
+    grobs::Array{Grob}
     style::Style
     function Canvas(grobs; style=Style(fill=NC"white"))
         new(grobs, style)
@@ -38,16 +38,17 @@ type Canvas <: Grob
 end
 
 function render(go::Canvas)
-    patches = []
-    for g in go.grobs
-        push!(patches, render(g))
-    end
     # using collections removes all styling, style must be passed into the PatchCollection
+    # patches = []
+    # for g in go.grobs
+    #     push!(patches, render(g))
+    # end
     #pcol = mcol.PatchCollection(patches)
     (fig, ax) = subplots()
     # apply style to axes
     ax[:patch][:set_facecolor](go.style.fill)
-    for p in patches
+    for g in go.grobs
+        p = render(g)
         # assume that we have either lines or patches
         if pyisinstance(p, mlines.Line2D)
             ax[:add_line](p)
@@ -65,6 +66,7 @@ type Point
     x::Float64
     y::Float64
 end
+
 function Base.convert(::Type{Point}, t::Union{Tuple, AbstractArray})
     if length(t) != 2
         throw(ArgumentError("Only length 2 objects can be converted to Point"))
@@ -73,11 +75,25 @@ function Base.convert(::Type{Point}, t::Union{Tuple, AbstractArray})
 end
 PyCall.PyObject(t::Point) = PyObject((t.x, t.y))
 
+function Base.convert{T <: Real}(::Type{Array{Point}}, a::Array{T, 2})
+    (na, ma) = size(a)
+    #TODO: need to think about a 2x2 array, since it is ambigous, currently I assume
+    # column major
+    if na == 2
+        squeeze(mapslices(x->Point(x), a, 1), 1)
+    elseif ma == 2
+        squeeze(mapslices(x->Point(x), a, 2), 2)
+    else
+        throw(DimensionError())
+    end
+end
+
 type Circle <: Grob
     c::Point
     r::Float64
     style::Style
-    function Circle(p, r; style=Style())
+    # by default it seems svg has stroke=:none, fill=NC"black", not sure if that is good
+    function Circle(p, r; style=Style(stroke=:none, fill=NC"black"))
         new(p, r, style)
     end
 end
@@ -87,7 +103,7 @@ function render(go::Circle)
 end
 
 type PolyLine <: Grob
-    points::AbstractArray{Point}
+    points::Array{Point}
     style::Style
     function PolyLine(points; style=Style())
         new(points, style)
@@ -109,7 +125,7 @@ function render(go::PolyLine)
 end
 
 type Polygon <: Grob
-    points::AbstractArray{Point}
+    points::Array{Point}
     style::Style
     function Polygon(points; style=Style(fill=NC"black"))
         new(points, style)
