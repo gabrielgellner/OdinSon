@@ -66,6 +66,7 @@ type Point
     x::Float64
     y::Float64
 end
+Base.zero(::Point) = Point(0.0, 0.0)
 
 function Base.convert(::Type{Point}, t::Union{Tuple, AbstractArray})
     if length(t) != 2

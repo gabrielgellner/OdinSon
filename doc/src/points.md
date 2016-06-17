@@ -13,3 +13,6 @@ natural, way to generate such points in Julia. As such two other forms are also 
 
 1. Either an 2 by M, or an N by 2 `Matrix`.
 2. Separate vectors of x and y values. It is required that they are the same length.
+
+> I might want to look into using `FixedSizeArrays.jl` for implementing `Point` to make the
+structure more explicit, and maybe faster.

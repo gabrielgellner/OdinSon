@@ -23,13 +23,15 @@ function snowflake(pt)
     arg2 = vcat(startline, endline)
 
     # this recreates the Outer(#1 . #2&, rots, arg2, 1) call in mathematica
-    out = []
+    ##TODO: out can contain an 2dim Array, so the size is not enforced. I would likely
+    ## need to use FixedSizeArrays to do this perfectly
+    out = Array{Array{Float64, 2}}(length(rots))
     for i = 1:length(rots)
         poly = zeros(2, size(arg2, 1))
         for j = 1:size(arg2, 1)
             poly[:, j] = rots[i] * arg2[j, :]'
         end
-        push!(out, poly)
+        out[i] = poly
     end
     ps = map(p->Polygon(p, style=Style(stroke=:none, fill=NC"white", fill_opacity=0.5)), out)
 
