@@ -33,7 +33,7 @@ function snowflake(pt)
         end
         out[i] = poly
     end
-    ps = map(p->Polygon(p, style=Style(stroke=:none, fill=NC"white", fill_opacity=0.5)), out)
+    ps = map(p->Polygon(p, style=Style(stroke=nothing, fill=NC"white", fill_opacity=0.5)), out)
 
     return Canvas(ps, style=Style(fill=NC"black"))
 end

@@ -27,6 +27,6 @@ rs = abs(0.1*cos(Θ))
 
 circles = Array{Circle}(ncirc)
 for (i, col) in enumerate(take(greys, ncirc)) # I do this to get the repeats working, think of cleaner way
-    circles[i] = Circle((xs[i], ys[i]), rs[i], style=Style(stroke=col, fill=:none))
+    circles[i] = Circle((xs[i], ys[i]), rs[i], style=Style(stroke=col, fill=nothing))
 end
 render(Canvas(circles))

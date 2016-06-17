@@ -7,9 +7,9 @@ import PyPlot: subplots
 @pyimport matplotlib.lines as mlines
 
 type Style
-    stroke::Union{RGB, Symbol} # can I make sure only :none is allowed?
+    stroke::Union{RGB, Void}
     stroke_width::Float64
-    fill::Union{RGB, Symbol} # should also be able to be some kind of none, for not filled
+    fill::Union{RGB, Void}
     fill_opacity::Float64 # should check for being between 0-1
     function Style(;stroke=NC"black", stroke_width=1.0, fill=NC"white", fill_opacity=1.0)
         new(stroke, stroke_width, fill, fill_opacity)
@@ -93,8 +93,8 @@ type Circle <: Grob
     c::Point
     r::Float64
     style::Style
-    # by default it seems svg has stroke=:none, fill=NC"black", not sure if that is good
-    function Circle(p, r; style=Style(stroke=:none, fill=NC"black"))
+    # by default it seems svg has stroke=nothing, fill=NC"black", not sure if that is good
+    function Circle(p, r; style=Style(stroke=nothing, fill=NC"black"))
         new(p, r, style)
     end
 end
