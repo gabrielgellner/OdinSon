@@ -25,9 +25,8 @@ using OdinSon
 using PyPlot
 
 function colorflake()
-    clr1 = NC"black"
+    clr1 = RGB(rand(3)...)
     clr2 = RGB(rand(3)...)
-    clr3 = RGB(rand(3)...)
     thick = rand(Uniform(2, 7)) # need to get this better, MM linewidth is based on size of figure
     tm = 1 # this seems needless in the current code
 
@@ -40,10 +39,10 @@ function colorflake()
     y1(t) = cos(0.5*t) - a*sin(b*t).*sin(t) - 0.1*c*cos(10*b*t)
 
     t = linspace(0, tm*4.0*π, 5000)
-    plot(x1(t), y1(t), c=clr2, linewidth=thick)
-    plot(x1(t), y1(t), c=clr3, linewidth=0.2*thick)
+    plot(x1(t), y1(t), c=clr1, linewidth=thick)
+    plot(x1(t), y1(t), c=clr2, linewidth=0.2*thick)
     gca()[:set_aspect]("equal")
-    gca()[:set_axis_bgcolor](clr1)
+    gca()[:set_axis_bgcolor](NC"black")
 end
 
 colorflake()
