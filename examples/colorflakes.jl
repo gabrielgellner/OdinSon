@@ -58,18 +58,19 @@ function colorflake()
     clr1 = NC"black"
     clr2 = RGB(rand(3)...)
     clr3 = RGB(rand(3)...)
-    thick = rand(Uniform(1, 3)) # need to get this better, look into the units of mathematica + matplotlib
+    thick = rand(Uniform(2, 7)) # need to get this better, look into the units of mathematica + matplotlib
+
     a = rand(Uniform(0, 1.5))
     b = rand(3:15)
-    c = rand(Uniform(5, 10))
+    c = rand(Uniform(0, 1.5))
     # this creates a closure over the parameters, might not be the best way
     # this is also vectorized since sin/cos are, can't wait for f.() syntax!
     x1(t) = sin(0.5*t) - a*sin(b*t).*cos(t) - 0.1*c*sin(10*b*t)
     y1(t) = cos(0.5*t) - a*sin(b*t).*sin(t) - 0.1*c*cos(10*b*t)
 
-    t = linspace(0, 4.0*π, 300)
-    plot(x1(t), y1(t), c=clr2, linewidth=0.8*thick)
-    plot(x1(t), y1(t), c=clr3, linewidth=0.5thick)
+    t = linspace(0, 4.0*π, 3000)
+    plot(x1(t), y1(t), c=clr2, linewidth=thick)
+    plot(x1(t), y1(t), c=clr3, linewidth=0.1*thick)
     gca()[:set_aspect]("equal")
     gca()[:set_axis_bgcolor](clr1)
 end
