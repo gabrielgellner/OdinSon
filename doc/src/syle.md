@@ -13,4 +13,39 @@ what other API's use.
 * GridLines, GridLinesStyle
 
 ### Grid
-* grid.xaxis, grid.yaxis, xaxisGrob, yaxisGrob, (can change things with grob.edit, which a grob! like func would be sweet) 
+* grid.xaxis, grid.yaxis, xaxisGrob, yaxisGrob, (can change things with grob.edit, which a
+    grob! like func would be sweet)
+
+## Axes Type
+```julia
+type Spine
+    position # this needs to deal with inward/outward styles as well as special "center", or the different coordinate locations
+    bounds
+    visible::Bool # do I want this, is there a more consistent way to have this on/off
+    style::Style
+end
+
+type AxesSpines
+    top::Spine
+    bottom::Spine
+    left::Spine
+    right::Spine
+end
+
+type AxesTicks
+end
+
+type Axes
+    spines::AxesSpines
+    ticks::AxesTicks
+    labels
+end
+```
+
+## Some Trials
+
+```julia
+# If axis are Grobs do we add them to the ViewPort array? What does that mean for the order?
+# Can there be many axis for the same ViewPort? I think it should be a ViewPort field
+Viewport([], axis=Axis(xaxis=))
+```

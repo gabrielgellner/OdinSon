@@ -14,7 +14,7 @@ SEABORN_PALETTES = Dict(
 
 color_cycle(carr::AbstractArray) = cycler.cycler("color", carr)
 
-#this needs a more a more julian name something like style!, palette!
+#TODO: this needs a more a more julian name something like style!, palette!
 function set_palette(name::Symbol)
     colprop = color_cycle(SEABORN_PALETTES[name])
     plt[:rc]("axes", prop_cycle=colprop)
@@ -35,7 +35,7 @@ end
 # the order will matter ... or maybe I should have it return multiple
 color_defs = [svg_rgb, crayons, xkcd_rgb]
 
-function parse_cstring(name::ASCIIString)
+function colorname2rgb(name::ASCIIString)
     for def in color_defs
         if haskey(def, name)
             return parse(Colorant, def[name])
@@ -46,8 +46,8 @@ end
 
 #NC for Named Color
 macro NC_str(name::ASCIIString)
-    c = parse_cstring(name)
-    return :( $c )
+    c = colorname2rgb(name)
+    return :($c)
 end
 
 #HC for Hex Color
