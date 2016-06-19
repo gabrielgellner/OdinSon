@@ -37,3 +37,46 @@ Style(axes=AxesStyle(stroke_width=0.8, stroke=NC"red"))
 convert(Point, (1, 2))
 convert(Point, [1, 2])
 convert(Point, [1, 2, 3])
+
+const _style_attrs = Dict{Symbol, Any}(
+    :stroke => NC"black",
+    :fill => :none,
+    :stroke_width => 1.0)
+
+function _check_attrs(attrs::Symbol)
+    unknown = Symbol[]
+    for attr in attrs
+        if !haskey(_style_attrs, attr)
+            push!(unknown, attr)
+        end
+    end
+    return unknown
+end
+
+type Style2
+    attrs::Dict{Symbol, Any}
+end
+
+function Style2(;kwargs...)
+    kw = Dict{Symbol, Any}(kwargs)
+    unknown = _check_attrs(keys(kw))
+    if length(unknown) == 0
+        return Style2(merge(_style_attrs, kw))
+    else
+        throw(ArgumentError("Unknown style attributes: $unknown"))
+    end
+end
+
+Base.getindex(s::Style2, key::Symbol) = s.attrs[key]
+function Base.setindex!(s::Style2, value, key::Symbol)
+    if haskey(s.attrs, key)
+        s.attrs[key] = value
+        return value
+    else
+        throw(ArgumentError("Unknown style attribute: $key"))
+    end
+end
+
+s = Style2(stroke_width=5)
+s[:stroke_width]
+s[:james] = NC"red"
