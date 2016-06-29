@@ -80,3 +80,20 @@ end
 s = Style2(stroke_width=5)
 s[:stroke_width]
 s[:james] = NC"red"
+
+# so pretty nice, but a lot of work and I don't have type checking on my arguments. The
+# Type solution is looking nicer. I just want to add a merge method.
+#
+# Soooo. What to do about the Union{RGB, Void} issues. I like storing the RGB since
+# this would mean I can use all the nice facilities of Colors, but due to the potential
+# for nothing, I need to do a lot of checks, and lose type stability. I could go to
+# Nullable{RGB}, but I am not sure that is the correct semantics, as it is not missing,
+# as much as "not colored". I think I need a new type that is more descriptive. nothing
+# is really for functions that don't return anything.
+#
+Viewport
+AxesView
+GridView
+grid.layout([2, 3]) # rows and columns
+Viewport([], inset=Inset(Viewport())
+Canvas(Viewport)
