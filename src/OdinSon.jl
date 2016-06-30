@@ -1,7 +1,5 @@
 module OdinSon
 
-# Seaborn like exports TODO: make these names more julian
-export set_palette, color_cycle
 
 # core types
 include("coretypes.jl")
@@ -16,6 +14,12 @@ include("color.jl")
 export PyObject # my overload so that RGB types are turned to python tuples
 export crayons, xkcd_rgb, svg_rgb
 export @NC_str, @HC_str, HSV, RGB
+# Seaborn like exports TODO: make these names more julian
+export set_palette, color_cycle
+
+include("util.jl")
+# setup the default styling
+_set_mpl_kws()
 
 # Styling
 include("style.jl")

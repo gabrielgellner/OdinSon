@@ -47,3 +47,10 @@ end
 # This is pretty verbose
 AxesView([g1, g2], axes=Axes(spines=Spines(left=Spine(), bottom=Spine())))
 ```
+
+## Test of the general design
+If I wanted to make a basic plotting function, how would I need to specify the many styling
+options
+```julia
+plot(x, y, linestyle=(), axes=Axes())
+```
