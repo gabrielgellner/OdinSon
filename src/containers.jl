@@ -32,3 +32,36 @@ function render(go::Canvas)
     ax[:set_aspect]("equal") # TODO: make this an option
     return fig
 end
+
+##TODO: not really sure this is a container, and not just a style, but it is an attribute
+# of an AxesView
+type Spine
+    # this needs to deal with inward/outward styles as well as special "center", or
+    # the different coordinate locations
+    position::Vector{Float64}
+    #bounds
+    #visible::Bool # do I want this, is there a more consistent way to have this on/off
+    #style::Style
+end
+
+type Spines
+    top::Spine
+    bottom::Spine
+    left::Spine
+    right::Spine
+end
+
+type AxesTicks
+end
+
+type Axes
+    spines::Spines
+    #ticks::AxesTicks
+    #labels
+end
+
+type AxesView
+    grobs::Array{Grob}
+    axes::Axes
+    style::Style
+end

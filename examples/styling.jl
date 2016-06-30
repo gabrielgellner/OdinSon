@@ -7,7 +7,6 @@ diagram = Canvas([Circle([0, 0], 1), Circle([1, 1], 0.5, style=Style(fill=NC"vio
 render(diagram)
 xlim(-2, 2)
 ylim(-2, 2)
-gca()[:set_aspect]("equal")
 
 diagram = Canvas([PolyLine(Array[[1, 2], [2, 3], [3, 2]], style=Style(stroke_width=5, stroke=HSV(180, 1, 1)))])
 render(diagram)
@@ -92,8 +91,14 @@ s[:james] = NC"red"
 # is really for functions that don't return anything.
 #
 Viewport
+GraphicsView # instead of Viewport for naming consistency a Viewport could be the abstract type
 AxesView
 GridView
-grid.layout([2, 3]) # rows and columns
+# This will work from 0.5+ since there will no longer be implicit concat
+GridView([[Viewport, AxesView], [AxesView]]) #(2 rows, 2 columns, second column spans)
+# Is it worth having something that does a reshape? like:
+GridView([v1, v2, v3, v4], layout=Layout([2, 2])) # rows and columns
 Viewport([], inset=Inset(Viewport())
+Viewport([], inset=Inset([Viewport(), AxesView()]))
+
 Canvas(Viewport)

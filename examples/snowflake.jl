@@ -1,7 +1,7 @@
 using OdinSon
 using AffineTransforms
 using Distributions
-
+import Base: *, \
 # extend the algebra of AffineTransform to be more permissive, tform{fwd, inv}
 # does type checking, sent a fix upstream, remove once new tagged version
 *(a::AffineTransform, v::AbstractArray) = tformfwd(a, v)

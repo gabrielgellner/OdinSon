@@ -25,7 +25,7 @@ type Spine
     style::Style
 end
 
-type AxesSpines
+type Spines
     top::Spine
     bottom::Spine
     left::Spine
@@ -36,16 +36,14 @@ type AxesTicks
 end
 
 type Axes
-    spines::AxesSpines
+    spines::Spines
     ticks::AxesTicks
     labels
 end
 ```
 
 ## Some Trials
-
 ```julia
-# If axis are Grobs do we add them to the ViewPort array? What does that mean for the order?
-# Can there be many axis for the same ViewPort? I think it should be a ViewPort field
-Viewport([], axis=Axis(xaxis=))
+# This is pretty verbose
+AxesView([g1, g2], axes=Axes(spines=Spines(left=Spine(), bottom=Spine())))
 ```
