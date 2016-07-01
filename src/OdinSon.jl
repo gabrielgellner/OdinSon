@@ -27,7 +27,7 @@ export Style
 
 # Containers
 include("containers.jl")
-export Canvas
+export Canvas, Viewport
 
 # Basic SVG/Mathematica like language
 include("shapes.jl")
