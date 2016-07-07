@@ -9,8 +9,7 @@ SEABORN_PALETTES = Dict(
     :pastel => ["#92C6FF", "#97F0AA", "#FF9F9A", "#D0BBFF", "#FFFEA3", "#B0E0E6"],
     :bright => ["#003FFF", "#03ED3A", "#E8000B", "#8A2BE2", "#FFC400", "#00D7FF"],
     :dark => ["#001C7F", "#017517", "#8C0900", "#7600A1", "#B8860B", "#006374"],
-    :colorblind => ["#0072B2", "#009E73", "#D55E00", "#CC79A7", "#F0E442", "#56B4E9"]
-)
+    :colorblind => ["#0072B2", "#009E73", "#D55E00", "#CC79A7", "#F0E442", "#56B4E9"])
 
 color_cycle(carr::AbstractArray) = cycler.cycler("color", carr)
 
