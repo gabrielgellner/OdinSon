@@ -9,7 +9,7 @@ end
 function _restyle_boxplot(adict, color)
     # take a drawn matplotlib boxplot and make it look nice.
     linewidth = 2
-    gray = NC"grey" #TODO: recreate the logic from seaborn for setting this
+    gray = NC"gray" #TODO: recreate the logic from seaborn for setting this
     fliersize = 5
     for box in adict["boxes"]
         box[:update](Dict(:facecolor => color, :zorder => 0.9, :edgecolor => gray, :linewidth => linewidth))

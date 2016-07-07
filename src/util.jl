@@ -4,21 +4,21 @@ import PyPlot: rc, matplotlib
 function _set_mpl_kws()
     # these names are defined in seaborn. I should somehow add them to the
     # color defs
-    dark_grey = HC"#262626"
-    light_grey = HC"#CCCCCC"
+    dark_gray = HC"#262626"
+    light_gray = HC"#CCCCCC"
     set_palette(:deep) # set line color cycle
     style_dict = Dict(
         "figure.facecolor" => NC"white",
         "axes.axisbelow" => true,
-        "axes.labelcolor" => dark_grey,
+        "axes.labelcolor" => dark_gray,
         "axes.facecolor" => NC"white",
-        "axes.edgecolor" => dark_grey,
+        "axes.edgecolor" => dark_gray,
         "axes.linewidth" => 1,
 
         "xtick.direction" => "out",
         "ytick.direction" => "out",
-        "xtick.color" => dark_grey,
-        "ytick.color" => dark_grey,
+        "xtick.color" => dark_gray,
+        "ytick.color" => dark_gray,
         "xtick.major.width" => 1,
         "ytick.major.width" => 1,
         "xtick.minor.width" => 0.5,
@@ -36,7 +36,7 @@ function _set_mpl_kws()
 
         "font.family" => ["sans-serif"],
         "font.sans-serif" => ["Arial", "Liberation Sans", "Bitstream Vera Sans", "sans-serif"],
-        "text.color" => dark_grey,
+        "text.color" => dark_gray,
 
         "image.cmap" => "Greys",
 
