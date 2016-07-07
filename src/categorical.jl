@@ -44,5 +44,6 @@ end
 
 # test remove once ready
 using Distributions
-data = rand(Normal(0, 1), 100)
+#TODO: I really don't like th (1:6)'/2 bit, is this idomatic? Find out best way.
+data = rand(Normal(0, 1), 20, 6) .+ (1:6)'/2
 oboxplot(data)
