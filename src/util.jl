@@ -17,6 +17,8 @@ function _set_mpl_kws()
 
         "xtick.direction" => "out",
         "ytick.direction" => "out",
+        # don't have ticks on top or left by default
+        #TODO: this can not be done in rcParams, hence seaborns `despine function`
         "xtick.color" => dark_gray,
         "ytick.color" => dark_gray,
         "xtick.major.width" => 1,
