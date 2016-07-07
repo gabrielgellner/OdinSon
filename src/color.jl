@@ -3,21 +3,6 @@ import PyCall: @pyimport, PyObject
 @pyimport cycler
 import PyPlot: plt
 
-SEABORN_PALETTES = Dict(
-    :deep => ["#4C72B0", "#55A868", "#C44E52", "#8172B2", "#CCB974", "#64B5CD"],
-    :muted => ["#4878CF", "#6ACC65", "#D65F5F", "#B47CC7", "#C4AD66", "#77BEDB"],
-    :pastel => ["#92C6FF", "#97F0AA", "#FF9F9A", "#D0BBFF", "#FFFEA3", "#B0E0E6"],
-    :bright => ["#003FFF", "#03ED3A", "#E8000B", "#8A2BE2", "#FFC400", "#00D7FF"],
-    :dark => ["#001C7F", "#017517", "#8C0900", "#7600A1", "#B8860B", "#006374"],
-    :colorblind => ["#0072B2", "#009E73", "#D55E00", "#CC79A7", "#F0E442", "#56B4E9"])
-
-color_cycle(carr::AbstractArray) = cycler.cycler("color", carr)
-
-#TODO: this needs a more a more julian name something like style!, palette!
-function set_palette(name::Symbol)
-    colprop = color_cycle(SEABORN_PALETTES[name])
-    plt[:rc]("axes", prop_cycle=colprop)
-end
 
 # I need a way to convert the types from Colors.jl (RGB{8}(r, g, b) -> python tuple)
 # this code is directly from PyCall.jl -> conversions.jl for tuple conversion
@@ -54,4 +39,21 @@ macro HC_str(hexstr::ASCIIString)
     #TODO: test to ensure actually a hex string
     c = parse(Colorant, hexstr)
     return :($c)
+end
+
+# Named color palettes
+SEABORN_PALETTES = Dict(
+:deep => [HC"#4C72B0", HC"#55A868", HC"#C44E52", HC"#8172B2", HC"#CCB974", HC"#64B5CD"],
+:muted => [HC"#4878CF", HC"#6ACC65", HC"#D65F5F", HC"#B47CC7", HC"#C4AD66", HC"#77BEDB"],
+:pastel => [HC"#92C6FF", HC"#97F0AA", HC"#FF9F9A", HC"#D0BBFF", HC"#FFFEA3", HC"#B0E0E6"],
+:bright => [HC"#003FFF", HC"#03ED3A", "#E8000B", HC"#8A2BE2", HC"#FFC400", HC"#00D7FF"],
+:dark => [HC"#001C7F", HC"#017517", "#8C0900", HC"#7600A1", HC"#B8860B", HC"#006374"],
+:colorblind => [HC"#0072B2", HC"#009E73", HC"#D55E00", HC"#CC79A7", HC"#F0E442", HC"#56B4E9"])
+
+color_cycle(carr::AbstractArray) = cycler.cycler("color", carr)
+
+#TODO: this needs a more a more julian name something like style!, palette!
+function set_palette(name::Symbol)
+    colprop = color_cycle(SEABORN_PALETTES[name])
+    plt[:rc]("axes", prop_cycle=colprop)
 end

@@ -23,14 +23,15 @@ include("coretypes.jl")
 export Point
 
 # Colors
-import ColorTypes: HSV, RGB
+import ColorTypes: HSV, RGB, HSL
+export HSV, RGB, HSL
 include("color_data/crayon.jl")
 include("color_data/xkcd.jl")
 include("color_data/svg.jl")
 include("color.jl")
 export PyObject # my overload so that RGB types are turned to python tuples
 export crayons, xkcd_rgb, svg_rgb
-export @NC_str, @HC_str, HSV, RGB
+export @NC_str, @HC_str
 # Seaborn like exports TODO: make these names more julian
 export set_palette, color_cycle
 
