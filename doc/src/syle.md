@@ -13,4 +13,5 @@ what other API's use.
 * GridLines, GridLinesStyle
 
 ### Grid
-* grid.xaxis, grid.yaxis, xaxisGrob, yaxisGrob, (can change things with grob.edit, which a grob! like func would be sweet) 
+* grid.xaxis, grid.yaxis, xaxisGrob, yaxisGrob, (can change things with grob.edit, which a
+  grob! like func would be sweet)
