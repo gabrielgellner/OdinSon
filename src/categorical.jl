@@ -52,3 +52,99 @@ using Distributions
 #TODO: I really don't like th (1:6)'/2 bit, is this idomatic? Find out best way.
 data = rand(Normal(0, 1), 20, 6) .+ (1:6)'/2
 oboxplot(data)
+
+#API ideas
+type BoxPlotStyle
+    boxes::Dict{Symbol, Any}
+    whiskers::Dict{Symbol, Any}
+    fences::Dict{Symbol, Any} # base R calls this staple, matplotlib calls this caps
+    medians::Dict{Symbol, Any} # base R: med
+    outliers::Dict{Symbol, Any} # base R: outl, fliers
+    #notch::BoxPlotStyle
+    function BoxPlotStyle(;
+        boxes=Dict(:zorder => 0.9, :edgecolor => gray, :linewidth => linewidth),
+        whiskers=Dict(:color => gray, :linewidth => linewidth, :linestyle => "-"),
+        fences=Dict(:color => gray, :linewidth => linewidth),
+        medians=Dict(:color => gray, :linewidth => linewidth),
+        outliers=Dict(:markerfacecolor => gray, :marker => "d", :markeredgecolor => gray, :markersize => fliersize)
+        )
+        new(boxes, whiskers, fences, medians, outliers)
+    end
+end
+
+using OdinSon
+
+function gpar(;kwargs...)
+    Dict{Symbol, Any}(kwargs)
+end
+
+gray = NC"gray"
+style1 = gpar(
+boxes=gpar(zorder=0.9, edgecolor=gray, linewidth=2),
+whiskers=gpar(color=gray, linewidth=2, linestyle="-"),
+fences=gpar(color=gray, linewidth=2),
+medians=gpar(color=gray, linewidth=2),
+outliers=gpar(markerfacecolor=gray, marker="d", markeredgecolor=gray, markersize=5))
+
+style2 = gpar(
+    boxes=gpar(zorder=0.9, edgecolor=gray, linewidth=2),
+    whiskers=gpar(color=NC"red", linewidth=5, linestyle="-"),
+    outliers=gpar(markerfacecolor=gray, marker="d", markeredgecolor=gray, markersize=5))
+
+# how do I do updates/mergers for these kinds of tree structures
+merge(style1, style2) # so merge just works
+
+# can I make a simple function that does validation?
+
+# Attempt at API
+type Boxplot
+    data::AbstractArray
+    style::Dict{Symbol, Any}
+end
+
+function OdinSon.render(bp::Boxplot)
+    #TODO: I would rather not create a new figure, how do I return something composable
+    f = figure()
+    ax = f[:add_subplot](111)
+    vert = true
+    colors = OdinSon.SEABORN_PALETTES[:deep]
+    adict = ax[:boxplot](bp.data, vert=vert, patch_artist=true)
+    # currently I only change the box on a per column basis
+    for (j, box) in enumerate(adict["boxes"])
+        box[:update](merge(bp.style[:boxes], gpar(color=colors[j])))
+    end
+    for whisk in adict["whiskers"]
+        whisk[:update](bp.style[:whiskers])
+    end
+    for cap in adict["caps"]
+        cap[:update](bp.style[:fences])
+    end
+    for med in adict["medians"]
+        med[:update](bp.style[:medians])
+    end
+    for fly in adict["fliers"]
+        fly[:update](bp.style[:outliers])
+    end
+
+    return f
+end
+
+function boxplot2(data; style=Dict{Symbol, Any}())
+    colors = OdinSon.SEABORN_PALETTES[:deep]
+    l = minimum([convert(HSL, convert(RGB{Float32}, color)).l for color in colors])
+    gray = RGB(l*0.6, l*0.6, l*0.6)
+    #TODO: think of a better name for _style
+    _style = gpar(
+        boxes=gpar(color=colors[1], zorder=0.9, edgecolor=gray, linewidth=2),
+        whiskers=gpar(color=gray, linewidth=2, linestyle="-"),
+        fences=gpar(color=gray, linewidth=2),
+        medians=gpar(color=gray, linewidth=2),
+        outliers=gpar(markerfacecolor=gray, marker="d", markeredgecolor=gray, markersize=5)
+    )
+    merge!(_style, style)
+    return Boxplot(data, _style)
+end
+
+data = rand(100, 6)
+bp = boxplot2(data)
+render(bp)
