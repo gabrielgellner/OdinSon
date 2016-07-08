@@ -1,10 +1,9 @@
 using OdinSon
 using AffineTransforms
 using Distributions
-using PyPlot
-
+import Base: *, \
 # extend the algebra of AffineTransform to be more permissive, tform{fwd, inv}
-# does type checking
+# does type checking, sent a fix upstream, remove once new tagged version
 *(a::AffineTransform, v::AbstractArray) = tformfwd(a, v)
 \(a::AffineTransform, x::AbstractArray) = tforminv(a, x)
 #TODO: implement a real function like Mathematica's ReflectionMatrix

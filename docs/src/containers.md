@@ -50,6 +50,47 @@ Viewport is given in the Canvas item list, then a default one will be created. I
 have a Grid container that will do what Matplotlib does with a GridSpec, which will contain
 a Grid of aligned Viewport's.
 
+It really is not natural to do nested Viewport's using Matplotlib axes. I also notice that
+Mathematica doesn't really do nested Viewport like sets either, and has a much flatter
+coordinate hierarchy like Matplotlib does. I am going to do this instead as the fully
+general solution is hard to get right and I would rather work on the high level convenience
+methods. Hopefully this doesn't bite me in the ass later.
+
+So given that I am going to replicate the Matplotlib model and have
+root(Canvas) -many-> leaf(Viewport) I need to think about how I add the Viewport's to a
+canvas.
+
+Strictly I should do:
+```julia
+Canvas([Viewport[]...])
+# for a grid of Viewports?
+Canvas(grid([Viewport[], ..., Viewport[]], layout=GridLayout()))
+# This is very explicit, but I lose the common case of having, for a default viewport
+Canvas([Grobs...])
+# maybe I have the methods
+Canvas(::AbstractArray{Grob}) # create default viewport
+Canvas(::AbstractArray{Viewport}) # use explicit viewports
+```
+
+## Naming
+Something I am struggline with is what to do about the naming of my types. Clearly they to
+be like they are, but to create them should I be using the inner constructors or special
+methods?
+```julia
+canvas([viewport()])
+canvas(gridview())
+```
+The lowercase feels more correct. But then you think about types like `DataFrames` and
+`Dict` and they are created using the type constructors. The issue arrises for when I want
+some convience setups for things like `ViewPort`, if I want a version with the axes on
+`AxesView`, but really this is just a `ViewPort` with different attributes. So should I call
+this `axesview()`? In some ways this is related to things like `zeros()` which return
+special kinds of `Array` types.
+
+From the mailing list it seems that current naming (studly caps) is the correct way. I will
+continue trying to build the api using the current vision. Though I will still have the
+problem of
+
 ## Styling
 
 * SVG: style, and element parameters, CSS

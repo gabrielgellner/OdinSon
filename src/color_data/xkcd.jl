@@ -1,3 +1,4 @@
+#TODO: change all the grey -> gray
 const xkcd_rgb = Dict(
     "acid green"=> "#8ffe09",
     "adobe"=> "#bd6c48",
