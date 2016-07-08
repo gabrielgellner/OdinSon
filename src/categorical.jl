@@ -72,19 +72,17 @@ type BoxPlotStyle
     end
 end
 
-using OdinSon
-
 function gpar(;kwargs...)
     Dict{Symbol, Any}(kwargs)
 end
 
 gray = NC"gray"
 style1 = gpar(
-boxes=gpar(zorder=0.9, edgecolor=gray, linewidth=2),
-whiskers=gpar(color=gray, linewidth=2, linestyle="-"),
-fences=gpar(color=gray, linewidth=2),
-medians=gpar(color=gray, linewidth=2),
-outliers=gpar(markerfacecolor=gray, marker="d", markeredgecolor=gray, markersize=5))
+    boxes=gpar(zorder=0.9, stroke=gray, stroke_width=2),
+    whiskers=gpar(color=gray, stroke_width=2, linestyle="-"),
+    fences=gpar(color=gray, stroke_width=2),
+    medians=gpar(color=gray, stroke_width=2),
+    outliers=gpar(markerfacecolor=gray, marker="d", markeredgecolor=gray, markersize=5))
 
 style2 = gpar(
     boxes=gpar(zorder=0.9, edgecolor=gray, linewidth=2),
@@ -95,6 +93,24 @@ style2 = gpar(
 merge(style1, style2) # so merge just works
 
 # can I make a simple function that does validation?
+
+# some utilities to convert OdinSon like parameter names to matplotlib names
+translation_key = Dict{Symbol, Symbol}(
+    :fill => :color,
+    :stroke => :edgecolor,
+    :stroke_width => :linewidth)
+
+function gpar2mpl(kwdict)
+    newkw = copy(kwdict)
+    for (key, val) in kwdict
+        if haskey(translation_key, key)
+            newkw[translation_key[key]] = val
+        end
+    end
+    return newkw
+end
+
+gpar2mpl(style1)
 
 # Attempt at API
 type Boxplot
@@ -146,5 +162,9 @@ function boxplot2(data; style=Dict{Symbol, Any}())
 end
 
 data = rand(100, 6)
+bp = boxplot2(data)
+render(bp)
+
+data = rand(100)
 bp = boxplot2(data)
 render(bp)
