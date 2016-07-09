@@ -64,6 +64,86 @@ end
 gpar2mpl(style1)
 
 # Attempt at API
+"""
+    set_spine_position(spine, position)
+
+Set the spine's position without resetting an associated axis.
+
+As of matplotlib v. 1.0.0, if a spine has an associated axis, then
+spine.set_position() calls axis.cla(), which resets locators, formatters,
+etc.  We temporarily replace that call with axis.reset_ticks(), which is
+sufficient for our purposes.
+"""
+function _set_spine_position(spine, position)
+    axis = spine[:axis]
+    if axis != nothing
+        cla = axis[:cla]
+        axis[:cla] = axis[:reset_ticks]
+    end
+    spine[:set_position](position)
+    if axis != nothing
+        axis[:cla] = cla
+    end
+end
+
+function despine!(ax; top=true, right=true, left=false, bottom=false, offset=nothing, trim=false)
+    for (side, vis) in Dict("top" => top, "right" => right, "left" => left, "bottom" => bottom)
+        # Toggle the spine objects
+        is_visible = !vis #TODO, why use the inverse?
+        ax[:spines][side][:set_visible](is_visible)
+        if offset != nothing && is_visible
+            _set_spine_position(ax[:spines][side], ("outward", offset))
+        end
+    end
+    # Set the ticks appropriately
+    if bottom
+        ax[:xaxis][:tick_top]()
+    end
+    if top
+        ax[:xaxis][:tick_bottom]()
+    end
+    if left
+        ax[:yaxis][:tick_right]()
+    end
+    if right
+        ax[:yaxis][:tick_left]()
+    end
+
+    if trim
+        # clip off the parts of the spines that extend past major ticks
+        xticks = ax[:get_xticks]()
+        if length(xticks) > 0
+            #TODO: this ports over the idioms of the seaborn code (though compress might be faster)
+            # but I should see what is the idiomatic way of doing this in julia, should I use `filter`?
+            #firsttick = np.compress(xticks >= min(ax[:get_xlim]()), xticks)[0]
+            firsttick = xticks[xticks .>= minimum(ax[:get_xlim]())][1]
+            #lasttick = np.compress(xticks <= max(ax[:get_xlim]()), xticks)[-1]
+            lasttick = xticks[xticks .<= maximum(ax[:get_xlim]())][end]
+            ax[:spines]["bottom"][:set_bounds](firsttick, lasttick)
+            ax[:spines]["top"][:set_bounds](firsttick, lasttick)
+            #newticks = xticks.compress(xticks <= lasttick)
+            newticks = xticks[xticks .<= lasttick]
+            #newticks = newticks.compress(newticks >= firsttick)
+            newticks = newticks[newticks .>= firsttick]
+            ax[:set_xticks](newticks)
+        end
+        yticks = ax[:get_yticks]()
+        if length(yticks) > 0
+            #firsttick = np.compress(yticks >= min(ax[:get_ylim]()), yticks)[0]
+            firsttick = yticks[yticks .>= minimum(ax[:get_ylim]())][1]
+            #lasttick = np.compress(yticks <= max(ax[:get_ylim]()), yticks)[-1]
+            lasttick = yticks[yticks .<= maximum(ax[:get_ylim]())][end]
+            ax[:spines]["left"][:set_bounds](firsttick, lasttick)
+            ax[:spines]["right"][:set_bounds](firsttick, lasttick)
+            #newticks = yticks.compress(yticks <= lasttick)
+            newticks = yticks[yticks .<= lasttick]
+            #newticks = newticks.compress(newticks >= firsttick)
+            newticks = newticks[newticks .>= firsttick]
+            ax[:set_yticks](newticks)
+        end
+    end
+    return nothing
+end
 
 type AxesView
     items::Array{Any}
@@ -73,15 +153,11 @@ end
 function OdinSon.render(av::AxesView)
     f = figure()
     ax = f[:add_subplot](111)
-    ax[:spines]["right"][:set_color]("none")
-    ax[:spines]["top"][:set_color]("none")
-    ax[:xaxis][:set_ticks_position]("bottom")
-    ax[:spines]["bottom"][:set_position](("axes", -0.05))
-    ax[:yaxis][:set_ticks_position]("left")
-    ax[:spines]["left"][:set_position](("axes", -0.05))
     for item in av.items
         render!(ax, item)
     end
+    # run this after the elements have been added so the spine ranges are set
+    despine!(ax, offset=10, trim=true)
     return f
 end
 
