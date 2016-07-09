@@ -1,92 +1,22 @@
 using OdinSon
-using PyPlot
-
-function _establish_colors()
-    return OdinSon.SEABORN_PALETTES[:deep]
-end
-
-# Attempt to port some of the Seaborn functions for plotting categorical data
-function _restyle_boxplot(adict, colors)
-    # take a drawn matplotlib boxplot and make it look nice.
-    linewidth = 2
-    #gray = NC"gray" #TODO: recreate the logic from seaborn for setting this
-    #TODO: can replace with convert(HSL, col) once the fix is merged upstream
-    l = minimum([convert(HSL, convert(RGB{Float32}, color)).l for color in colors])
-    gray = RGB(l*0.6, l*0.6, l*0.6)
-    fliersize = 5
-
-    # currently I only change the box on a per column basis
-    for (j, box) in enumerate(adict["boxes"])
-        box[:update](Dict(:facecolor => colors[j], :zorder => 0.9, :edgecolor => gray, :linewidth => linewidth))
-    end
-    for whisk in adict["whiskers"]
-        whisk[:update](Dict(:color => gray, :linewidth => linewidth, :linestyle => "-"))
-    end
-    for cap in adict["caps"]
-        cap[:update](Dict(:color => gray, :linewidth => linewidth))
-    end
-    for med in adict["medians"]
-        med[:update](Dict(:color => gray, :linewidth => linewidth))
-    end
-    for fly in adict["fliers"]
-        fly[:update](Dict(:markerfacecolor => gray, :marker => "d", :markeredgecolor => gray, :markersize => fliersize))
-    end
-end
-
-function _draw_boxplot(ax, data)
-    colors = _establish_colors()
-    vert = true
-    artist_dict = ax[:boxplot](data, vert=vert, patch_artist=true)
-    _restyle_boxplot(artist_dict, colors)
-end
-
-#TODO: I need to use a funny name since otherwise I have problems with overwriting PyPlot
-function oboxplot(data)
-    # first lets just get the nicer styling of seaborn
-    ax = gca()
-    _draw_boxplot(ax, data)
-end
-
-# test remove once ready
 using Distributions
-#TODO: I really don't like th (1:6)'/2 bit, is this idomatic? Find out best way.
-data = rand(Normal(0, 1), 20, 6) .+ (1:6)'/2
-oboxplot(data)
 
-#API ideas
-type BoxPlotStyle
-    boxes::Dict{Symbol, Any}
-    whiskers::Dict{Symbol, Any}
-    fences::Dict{Symbol, Any} # base R calls this staple, matplotlib calls this caps
-    medians::Dict{Symbol, Any} # base R: med
-    outliers::Dict{Symbol, Any} # base R: outl, fliers
-    #notch::BoxPlotStyle
-    function BoxPlotStyle(;
-        boxes=Dict(:zorder => 0.9, :edgecolor => gray, :linewidth => linewidth),
-        whiskers=Dict(:color => gray, :linewidth => linewidth, :linestyle => "-"),
-        fences=Dict(:color => gray, :linewidth => linewidth),
-        medians=Dict(:color => gray, :linewidth => linewidth),
-        outliers=Dict(:markerfacecolor => gray, :marker => "d", :markeredgecolor => gray, :markersize => fliersize)
-        )
-        new(boxes, whiskers, fences, medians, outliers)
-    end
-end
-
+# API ideas
 function gpar(;kwargs...)
     Dict{Symbol, Any}(kwargs)
 end
 
 gray = NC"gray"
 style1 = gpar(
-    boxes=gpar(zorder=0.9, stroke=gray, stroke_width=2),
-    whiskers=gpar(color=gray, stroke_width=2, linestyle="-"),
-    fences=gpar(color=gray, stroke_width=2),
-    medians=gpar(color=gray, stroke_width=2),
+    boxes=gpar(stroke=gray, stroke_width=2, zorder=0.9),
+    whiskers=gpar(stroke=gray, stroke_width=2, linestyle="-"),
+    fences=gpar(stroke=gray, stroke_width=2),
+    medians=gpar(stroke=gray, stroke_width=2),
     outliers=gpar(markerfacecolor=gray, marker="d", markeredgecolor=gray, markersize=5))
 
 style2 = gpar(
-    boxes=gpar(zorder=0.9, edgecolor=gray, linewidth=2),
-    whiskers=gpar(color=NC"red", linewidth=5, linestyle="-"),
+    boxes=gpar(zorder=0.9, stroke=gray, stroke_width=2),
+    whiskers=gpar(stroke=NC"red", stroke_width=5, linestyle="-"),
     outliers=gpar(markerfacecolor=gray, marker="d", markeredgecolor=gray, markersize=5))
 
 # how do I do updates/mergers for these kinds of tree structures
@@ -95,76 +25,127 @@ merge(style1, style2) # so merge just works
 # can I make a simple function that does validation?
 
 # some utilities to convert OdinSon like parameter names to matplotlib names
+#TODO: sadly patch and line objects in matplotlib use inconsistent names
 translation_key = Dict{Symbol, Symbol}(
     :fill => :color,
     :stroke => :edgecolor,
     :stroke_width => :linewidth)
 
-function gpar2mpl(kwdict)
-    newkw = copy(kwdict)
+translation_key_line = Dict{Symbol, Symbol}(
+    :stroke => :color,
+    :stroke_width => :linewidth)
+
+translation_boxplot = Dict{Symbol, Dict}(
+    :boxes => translation_key,
+    :whiskers => translation_key_line,
+    :fences => translation_key_line,
+    :medians => translation_key_line,
+    :outliers => translation_key_line)
+
+function _process_keys(kwdict, translation)
+    kwd = Dict{Symbol, Any}()
     for (key, val) in kwdict
-        if haskey(translation_key, key)
-            newkw[translation_key[key]] = val
+        if typeof(val) <: Dict
+            kwd[key] = _process_keys(val, translation_boxplot[key])
+        elseif haskey(translation, key)
+            kwd[translation[key]] = val
+        else
+            kwd[key] = val
         end
     end
+    return kwd
+end
+
+function gpar2mpl(kwdict)
+    newkw = _process_keys(kwdict, nothing)
     return newkw
 end
 
 gpar2mpl(style1)
 
 # Attempt at API
+
+type AxesView
+    items::Array{Any}
+    scales::Dict{Symbol, Any}
+end
+
+function OdinSon.render(av::AxesView)
+    f = figure()
+    ax = f[:add_subplot](111)
+    ax[:spines]["right"][:set_color]("none")
+    ax[:spines]["top"][:set_color]("none")
+    ax[:xaxis][:set_ticks_position]("bottom")
+    ax[:spines]["bottom"][:set_position](("axes", -0.05))
+    ax[:yaxis][:set_ticks_position]("left")
+    ax[:spines]["left"][:set_position](("axes", -0.05))
+    for item in av.items
+        render!(ax, item)
+    end
+    return f
+end
+
 type Boxplot
-    data::AbstractArray
+    data::Array{Float64}
     style::Dict{Symbol, Any}
 end
 
-function OdinSon.render(bp::Boxplot)
+function render!(ax, bp::Boxplot)
+    _style = gpar2mpl(bp.style)
     #TODO: I would rather not create a new figure, how do I return something composable
-    f = figure()
-    ax = f[:add_subplot](111)
     vert = true
     colors = OdinSon.SEABORN_PALETTES[:deep]
     adict = ax[:boxplot](bp.data, vert=vert, patch_artist=true)
     # currently I only change the box on a per column basis
+    @show size(adict["boxes"])
     for (j, box) in enumerate(adict["boxes"])
-        box[:update](merge(bp.style[:boxes], gpar(color=colors[j])))
+        box[:update](merge(_style[:boxes], gpar(color=colors[j])))
     end
     for whisk in adict["whiskers"]
-        whisk[:update](bp.style[:whiskers])
+        whisk[:update](_style[:whiskers])
     end
     for cap in adict["caps"]
-        cap[:update](bp.style[:fences])
+        cap[:update](_style[:fences])
     end
     for med in adict["medians"]
-        med[:update](bp.style[:medians])
+        med[:update](_style[:medians])
     end
     for fly in adict["fliers"]
-        fly[:update](bp.style[:outliers])
+        fly[:update](_style[:outliers])
     end
 
-    return f
+    return nothing
 end
 
-function boxplot2(data; style=Dict{Symbol, Any}())
+function Boxplot(data; style=Dict{Symbol, Any}())
     colors = OdinSon.SEABORN_PALETTES[:deep]
     l = minimum([convert(HSL, convert(RGB{Float32}, color)).l for color in colors])
     gray = RGB(l*0.6, l*0.6, l*0.6)
     #TODO: think of a better name for _style
     _style = gpar(
-        boxes=gpar(color=colors[1], zorder=0.9, edgecolor=gray, linewidth=2),
-        whiskers=gpar(color=gray, linewidth=2, linestyle="-"),
-        fences=gpar(color=gray, linewidth=2),
-        medians=gpar(color=gray, linewidth=2),
+        boxes=gpar(fill=colors[1], zorder=0.9, stroke=gray, stroke_width=2),
+        whiskers=gpar(stroke=gray, stroke_width=2, linestyle="-"),
+        fences=gpar(stroke=gray, stroke_width=2),
+        medians=gpar(stroke=gray, stroke_width=2),
         outliers=gpar(markerfacecolor=gray, marker="d", markeredgecolor=gray, markersize=5)
     )
     merge!(_style, style)
     return Boxplot(data, _style)
 end
 
+boxplot2(data; style=Dict{Symbol, Any}()) = AxesView([Boxplot(data, style=style)], Dict{Symbol, Any}())
+
+#=
+# Examples
+=#
 data = rand(100, 6)
-bp = boxplot2(data)
+bp = boxplot2(data, style=style1)
 render(bp)
 
 data = rand(100)
 bp = boxplot2(data)
 render(bp)
+
+#TODO: I really don't like th (1:6)'/2 bit, is this idomatic? Find out best way.
+data = rand(Normal(0, 1), 20, 6) .+ (1:6)'/2
+render(boxplot2(data))
