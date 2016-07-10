@@ -172,8 +172,8 @@ function render!(ax, bp::Boxplot)
     vert = true
     colors = OdinSon.SEABORN_PALETTES[:deep]
     adict = ax[:boxplot](bp.data, vert=vert, patch_artist=true)
-    # currently I only change the box on a per column basis
-    @show size(adict["boxes"])
+    #TODO: currently I only change the box on a per column basis. How to I deal with multiple
+    # style options per boxplot, versus just a single.
     for (j, box) in enumerate(adict["boxes"])
         box[:update](merge(_style[:boxes], gpar(color=colors[j])))
     end
@@ -199,7 +199,7 @@ function Boxplot(data; style=Dict{Symbol, Any}())
     gray = RGB(l*0.6, l*0.6, l*0.6)
     #TODO: think of a better name for _style
     _style = gpar(
-        boxes=gpar(fill=colors[1], zorder=0.9, stroke=gray, stroke_width=2),
+        boxes=gpar(fill=NC"white", stroke=gray, stroke_width=2, zorder=0.9),
         whiskers=gpar(stroke=gray, stroke_width=2, linestyle="-"),
         fences=gpar(stroke=gray, stroke_width=2),
         medians=gpar(stroke=gray, stroke_width=2),
@@ -214,10 +214,12 @@ boxplot2(data; style=Dict{Symbol, Any}()) = AxesView([Boxplot(data, style=style)
 #=
 # Examples
 =#
+#TODO: this example the gray stroke of is too light
 data = rand(100, 6)
 bp = boxplot2(data, style=style1)
 render(bp)
 
+#TODO: this example the bottom spine is "missing" since there is only a single tick
 data = rand(100)
 bp = boxplot2(data)
 render(bp)
@@ -225,3 +227,11 @@ render(bp)
 #TODO: I really don't like th (1:6)'/2 bit, is this idomatic? Find out best way.
 data = rand(Normal(0, 1), 20, 6) .+ (1:6)'/2
 render(boxplot2(data))
+
+# Experiments. Making some styles that recreate R styles
+# Base
+style_base = gpar(
+    boxes=gpar(fill=NC"white", stroke=NC"black", stroke_width=1.5),
+    whiskers=gpar(stroke=NC"black", linestyle="--"),
+    fences=gpar(stroke=NC"black"))
+render(boxplot2(data, style=style_base))
