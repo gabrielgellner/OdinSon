@@ -42,15 +42,18 @@ translation_boxplot = Dict{Symbol, Dict}(
     :medians => translation_key_line,
     :outliers => translation_key_line)
 
+# for array style arguments values I really need them to be able to cycle
+nextval(it::Base.Cycle, i) = it.xs[(i - 1)%length(it.xs) + 1]
+
 function _process_keys(kwdict, translation)
     kwd = Dict{Symbol, Any}()
     for (key, val) in kwdict
         if typeof(val) <: Dict
             kwd[key] = _process_keys(val, translation_boxplot[key])
         elseif haskey(translation, key)
-            kwd[translation[key]] = val
+            kwd[translation[key]] = cycle([val])
         else
-            kwd[key] = val
+            kwd[key] = cycle([val])
         end
     end
     return kwd
@@ -61,7 +64,11 @@ function gpar2mpl(kwdict)
     return newkw
 end
 
-gpar2mpl(style1)
+mpl1 = gpar2mpl(style1)
+nextval(mpl1[:boxes][:edgecolor], 10)
+[(k, v) for (k, v) in mpl1[:boxes]]
+[(k, nextval(v, 1)) for (k, v) in mpl1[:boxes]]
+process_style(mpl1[:boxes], 1)
 
 # Attempt at API
 """
@@ -166,6 +173,8 @@ type Boxplot
     style::Dict{Symbol, Any}
 end
 
+process_style(styledict::Dict, idx::Int) = Dict([k => nextval(v, idx) for (k, v) in styledict])
+
 function render!(ax, bp::Boxplot)
     _style = gpar2mpl(bp.style)
     #TODO: I would rather not create a new figure, how do I return something composable
@@ -175,19 +184,19 @@ function render!(ax, bp::Boxplot)
     #TODO: currently I only change the box on a per column basis. How to I deal with multiple
     # style options per boxplot, versus just a single.
     for (j, box) in enumerate(adict["boxes"])
-        box[:update](merge(_style[:boxes], gpar(color=colors[j])))
+        box[:update](process_style(_style[:boxes], j))
     end
     for whisk in adict["whiskers"]
-        whisk[:update](_style[:whiskers])
+        whisk[:update](process_style(_style[:whiskers], 1))
     end
     for cap in adict["caps"]
-        cap[:update](_style[:fences])
+        cap[:update](process_style(_style[:fences], 1))
     end
     for med in adict["medians"]
-        med[:update](_style[:medians])
+        med[:update](process_style(_style[:medians], 1))
     end
     for fly in adict["fliers"]
-        fly[:update](_style[:outliers])
+        fly[:update](process_style(_style[:outliers], 1))
     end
 
     return nothing
@@ -199,7 +208,7 @@ function Boxplot(data; style=Dict{Symbol, Any}())
     gray = RGB(l*0.6, l*0.6, l*0.6)
     #TODO: think of a better name for _style
     _style = gpar(
-        boxes=gpar(fill=NC"white", stroke=gray, stroke_width=2, zorder=0.9),
+        boxes=gpar(fill=colors, stroke=gray, stroke_width=2, zorder=0.9),
         whiskers=gpar(stroke=gray, stroke_width=2, linestyle="-"),
         fences=gpar(stroke=gray, stroke_width=2),
         medians=gpar(stroke=gray, stroke_width=2),
@@ -226,12 +235,14 @@ render(bp)
 
 #TODO: I really don't like th (1:6)'/2 bit, is this idomatic? Find out best way.
 data = rand(Normal(0, 1), 20, 6) .+ (1:6)'/2
-render(boxplot2(data))
+render(boxplot2(data, style=gpar(boxes=gpar(fill=[NC"red", NC"blue"]))))
 
 # Experiments. Making some styles that recreate R styles
 # Base
 style_base = gpar(
-    boxes=gpar(fill=NC"white", stroke=NC"black", stroke_width=1.5),
-    whiskers=gpar(stroke=NC"black", linestyle="--"),
-    fences=gpar(stroke=NC"black"))
+    boxes=gpar(fill=NC"white", stroke=NC"black", stroke_width=1.0),
+    medians=gpar(stroke=NC"black", stroke_width=1.5),
+    whiskers=gpar(stroke=NC"black", linestyle="--", dashes=(5, 1.5)),
+    fences=gpar(stroke=NC"black"),
+    outliers=gpar(marker="o", markerfacecolor="none", markeredgecolor="black", markeredgewidth=1))
 render(boxplot2(data, style=style_base))
