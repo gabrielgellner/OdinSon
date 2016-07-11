@@ -54,3 +54,37 @@ options
 ```julia
 plot(x, y, linestyle=(), axes=Axes())
 ```
+
+## Boxplot Style parameters in other packages
+# Mathematica
+- ChartStyle
+    - Outliers: anyting that seems to have a head of "Outliers" can be interpreted as a styling for this
+
+# Matplotlib
+- outliers
+    - marker, markeredgecolor, markerfacecolor, markersize
+
+# Base R
+- pars
+    - outpch, outlty, outlwd, outcol, outbg
+
+# Plot.js
+- marker_z, markeralpha, markercolor, markershape, markersize, markerstrokealpha, markerstrokecolor, markerstrokewidth
+
+# Conclusions
+There are lots of versions of how to do this. What I want is a consistent taxonomy of how to specify these kinds
+of styling information for any object: (Try to be as SVG-like as makes sense)
+
+# Line-like (Line, Poly, Path)
+stroke, stroke_width, stroke_linecap,
+stroke_dash (can be named ("-"/"solid", "--"/"dashed", "-."/"dash_dot", ":"/"dotted" etc), or an array of dash patterns, or nothing (for solid stroke))
+fill (? clearly closed versions make sense, need to see what SVG does for open versions)
+
+# Poly-like
+stroke, stroke_width
+fill
+# Marker (should be like line/poly, but with marker_ in front)
+marker (the marker name, or object?)
+marker_stroke, marker_stroke_width
+marker_fill
+marker_size (uniform scaling), marker_width, marker_height

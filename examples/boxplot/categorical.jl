@@ -6,22 +6,6 @@ function gpar(;kwargs...)
     Dict{Symbol, Any}(kwargs)
 end
 
-gray = NC"gray"
-style1 = gpar(
-    boxes=gpar(stroke=gray, stroke_width=2, zorder=0.9),
-    whiskers=gpar(stroke=gray, stroke_width=2, linestyle="-"),
-    fences=gpar(stroke=gray, stroke_width=2),
-    medians=gpar(stroke=gray, stroke_width=2),
-    outliers=gpar(markerfacecolor=gray, marker="d", markeredgecolor=gray, markersize=5))
-
-style2 = gpar(
-    boxes=gpar(zorder=0.9, stroke=gray, stroke_width=2),
-    whiskers=gpar(stroke=NC"red", stroke_width=5, linestyle="-"),
-    outliers=gpar(markerfacecolor=gray, marker="d", markeredgecolor=gray, markersize=5))
-
-# how do I do updates/mergers for these kinds of tree structures
-merge(style1, style2) # so merge just works
-
 # can I make a simple function that does validation?
 
 # some utilities to convert OdinSon like parameter names to matplotlib names
@@ -29,18 +13,31 @@ merge(style1, style2) # so merge just works
 translation_key = Dict{Symbol, Symbol}(
     :fill => :color,
     :stroke => :edgecolor,
-    :stroke_width => :linewidth)
+    :stroke_width => :linewidth,
+    :stroke_dash => :linestyle,
+    :marker_fill => :markerfacecolor,
+    :marker_stroke => :markeredgecolor,
+    :marker_stroke_width => :markeredgewidth,
+    :marker_size => :markersize
+)
 
 translation_key_line = Dict{Symbol, Symbol}(
     :stroke => :color,
-    :stroke_width => :linewidth)
+    :stroke_width => :linewidth,
+    :stroke_dash => :linestyle,
+    :marker_stroke => :markeredgecolor,
+    :marker_size => :markersize,
+    :marker_fill => :markerfacecolor,
+    :marker_stroke_width => :markeredgewidth
+)
 
 translation_boxplot = Dict{Symbol, Dict}(
     :boxes => translation_key,
     :whiskers => translation_key_line,
     :fences => translation_key_line,
     :medians => translation_key_line,
-    :outliers => translation_key_line)
+    :outliers => translation_key_line
+)
 
 # for array style arguments values I really need them to be able to cycle
 nextval(it::Base.Cycle, i) = it.xs[(i - 1)%length(it.xs) + 1]
@@ -63,12 +60,6 @@ function gpar2mpl(kwdict)
     newkw = _process_keys(kwdict, nothing)
     return newkw
 end
-
-mpl1 = gpar2mpl(style1)
-nextval(mpl1[:boxes][:edgecolor], 10)
-[(k, v) for (k, v) in mpl1[:boxes]]
-[(k, nextval(v, 1)) for (k, v) in mpl1[:boxes]]
-process_style(mpl1[:boxes], 1)
 
 # Attempt at API
 """
@@ -122,29 +113,21 @@ function despine!(ax; top=true, right=true, left=false, bottom=false, offset=not
         if length(xticks) > 0
             #TODO: this ports over the idioms of the seaborn code (though compress might be faster)
             # but I should see what is the idiomatic way of doing this in julia, should I use `filter`?
-            #firsttick = np.compress(xticks >= min(ax[:get_xlim]()), xticks)[0]
             firsttick = xticks[xticks .>= minimum(ax[:get_xlim]())][1]
-            #lasttick = np.compress(xticks <= max(ax[:get_xlim]()), xticks)[-1]
             lasttick = xticks[xticks .<= maximum(ax[:get_xlim]())][end]
             ax[:spines]["bottom"][:set_bounds](firsttick, lasttick)
             ax[:spines]["top"][:set_bounds](firsttick, lasttick)
-            #newticks = xticks.compress(xticks <= lasttick)
             newticks = xticks[xticks .<= lasttick]
-            #newticks = newticks.compress(newticks >= firsttick)
             newticks = newticks[newticks .>= firsttick]
             ax[:set_xticks](newticks)
         end
         yticks = ax[:get_yticks]()
         if length(yticks) > 0
-            #firsttick = np.compress(yticks >= min(ax[:get_ylim]()), yticks)[0]
             firsttick = yticks[yticks .>= minimum(ax[:get_ylim]())][1]
-            #lasttick = np.compress(yticks <= max(ax[:get_ylim]()), yticks)[-1]
             lasttick = yticks[yticks .<= maximum(ax[:get_ylim]())][end]
             ax[:spines]["left"][:set_bounds](firsttick, lasttick)
             ax[:spines]["right"][:set_bounds](firsttick, lasttick)
-            #newticks = yticks.compress(yticks <= lasttick)
             newticks = yticks[yticks .<= lasttick]
-            #newticks = newticks.compress(newticks >= firsttick)
             newticks = newticks[newticks .>= firsttick]
             ax[:set_yticks](newticks)
         end
@@ -186,17 +169,17 @@ function render!(ax, bp::Boxplot)
     for (j, box) in enumerate(adict["boxes"])
         box[:update](process_style(_style[:boxes], j))
     end
-    for whisk in adict["whiskers"]
-        whisk[:update](process_style(_style[:whiskers], 1))
+    for (j, whisk) in enumerate(adict["whiskers"])
+        whisk[:update](process_style(_style[:whiskers], j))
     end
-    for cap in adict["caps"]
-        cap[:update](process_style(_style[:fences], 1))
+    for (j, cap) in enumerate(adict["caps"])
+        cap[:update](process_style(_style[:fences], j))
     end
-    for med in adict["medians"]
-        med[:update](process_style(_style[:medians], 1))
+    for (j, med) in enumerate(adict["medians"])
+        med[:update](process_style(_style[:medians], j))
     end
-    for fly in adict["fliers"]
-        fly[:update](process_style(_style[:outliers], 1))
+    for (j, fly) in enumerate(adict["fliers"])
+        fly[:update](process_style(_style[:outliers], j))
     end
 
     return nothing
@@ -219,30 +202,3 @@ function Boxplot(data; style=Dict{Symbol, Any}())
 end
 
 boxplot2(data; style=Dict{Symbol, Any}()) = AxesView([Boxplot(data, style=style)], Dict{Symbol, Any}())
-
-#=
-# Examples
-=#
-#TODO: this example the gray stroke of is too light
-data = rand(100, 6)
-bp = boxplot2(data, style=style1)
-render(bp)
-
-#TODO: this example the bottom spine is "missing" since there is only a single tick
-data = rand(100)
-bp = boxplot2(data)
-render(bp)
-
-#TODO: I really don't like th (1:6)'/2 bit, is this idomatic? Find out best way.
-data = rand(Normal(0, 1), 20, 6) .+ (1:6)'/2
-render(boxplot2(data, style=gpar(boxes=gpar(fill=[NC"red", NC"blue"]))))
-
-# Experiments. Making some styles that recreate R styles
-# Base
-style_base = gpar(
-    boxes=gpar(fill=NC"white", stroke=NC"black", stroke_width=1.0),
-    medians=gpar(stroke=NC"black", stroke_width=1.5),
-    whiskers=gpar(stroke=NC"black", linestyle="--", dashes=(5, 1.5)),
-    fences=gpar(stroke=NC"black"),
-    outliers=gpar(marker="o", markerfacecolor="none", markeredgecolor="black", markeredgewidth=1))
-render(boxplot2(data, style=style_base))
