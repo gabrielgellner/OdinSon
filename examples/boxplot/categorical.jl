@@ -14,7 +14,7 @@ translation_key = Dict{Symbol, Symbol}(
     :fill => :color,
     :stroke => :edgecolor,
     :stroke_width => :linewidth,
-    :stroke_dash => :linestyle,
+    #:stroke_dash => :linestyle,
     :marker_fill => :markerfacecolor,
     :marker_stroke => :markeredgecolor,
     :marker_stroke_width => :markeredgewidth,
@@ -24,7 +24,7 @@ translation_key = Dict{Symbol, Symbol}(
 translation_key_line = Dict{Symbol, Symbol}(
     :stroke => :color,
     :stroke_width => :linewidth,
-    :stroke_dash => :linestyle,
+    #:stroke_dash => :linestyle,
     :marker_stroke => :markeredgecolor,
     :marker_size => :markersize,
     :marker_fill => :markerfacecolor,
@@ -42,11 +42,27 @@ translation_boxplot = Dict{Symbol, Dict}(
 # for array style arguments values I really need them to be able to cycle
 nextval(it::Base.Cycle, i) = it.xs[(i - 1)%length(it.xs) + 1]
 
+function _process_dash(val)
+    if val in ["-", :none]
+        return "-"
+    elseif val == "--"
+        return (0, (6.5, 5.5))
+    elseif val == "-."
+        return (0, (5.0, 5.0, 2.0, 5.0))
+    elseif val == ":"
+        return (0, (2.0, 2.5))
+    else
+        return (0, val) # how do I deal with when it has the offset
+    end
+end
+
 function _process_keys(kwdict, translation)
     kwd = Dict{Symbol, Any}()
     for (key, val) in kwdict
         if typeof(val) <: Dict
             kwd[key] = _process_keys(val, translation_boxplot[key])
+        elseif key == :stroke_dash
+            kwd[:linestyle] = cycle([_process_dash(val)])
         elseif haskey(translation, key)
             kwd[translation[key]] = cycle([val])
         else
@@ -192,10 +208,10 @@ function Boxplot(data; style=Dict{Symbol, Any}())
     #TODO: think of a better name for _style
     _style = gpar(
         boxes=gpar(fill=colors, stroke=gray, stroke_width=2, zorder=0.9),
-        whiskers=gpar(stroke=gray, stroke_width=2, linestyle="-"),
+        whiskers=gpar(stroke=gray, stroke_width=2, stroke_dash=:none),
         fences=gpar(stroke=gray, stroke_width=2),
         medians=gpar(stroke=gray, stroke_width=2),
-        outliers=gpar(markerfacecolor=gray, marker="d", markeredgecolor=gray, markersize=5)
+        outliers=gpar(marker_fill=gray, marker="d", marker_stroke=gray, marker_size=5)
     )
     merge!(_style, style)
     return Boxplot(data, _style)
