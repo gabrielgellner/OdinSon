@@ -4,6 +4,13 @@ include("categorical.jl")
 # gpar functionality
 =#
 gray = NC"gray"
+core_style = gpar(
+    boxes=gpar(fill=colors, stroke=gray, stroke_width=2, zorder=0.9),
+    whiskers=gpar(stroke=gray, stroke_width=2, stroke_dash=:none),
+    fences=gpar(stroke=gray, stroke_width=2),
+    medians=gpar(stroke=gray, stroke_width=2),
+    outliers=gpar(marker_fill=gray, marker="d", marker_stroke=gray, marker_size=5))
+
 style1 = gpar(
     boxes=gpar(stroke=gray, stroke_width=2, zorder=0.9),
     whiskers=gpar(stroke=gray, stroke_width=2, stroke_dash="-"),
@@ -16,8 +23,9 @@ style2 = gpar(
     whiskers=gpar(stroke=NC"red", stroke_width=5, stroke_dash="-"),
     outliers=gpar(marker_fill=gray, marker="d", marker_stroke=gray, marker_size=5))
 
-# how do I do updates/mergers for these kinds of tree structures
-merge(style1, style2) # so merge just works
+# regular merge doesn't deal with the nested structure
+merge(core_style, style2)
+gparmerge(core_style, style2)
 
 #=
 # nextval checks
@@ -47,29 +55,23 @@ render(boxplot2(data, style=gpar(boxes=gpar(fill=OdinSon.SEABORN_PALETTES[:deep]
 
 # Experiments. Making some styles that recreate R styles
 # Base
+#TODO: need to make the boxes wider, need to clip the median line to the box
 style_base = gpar(
     boxes=gpar(fill=NC"white", stroke=NC"black", stroke_width=1.0),
-    medians=gpar(stroke=NC"black", stroke_width=1.5),
-    whiskers=gpar(stroke=NC"black", stroke_dash=(3, 1.5)),
-    fences=gpar(stroke=NC"black"),
-    outliers=gpar(marker="o", marker_fill=:none, marker_stroke=NC"black", marker_stroke_width=1))
+    medians=gpar(stroke=NC"black", stroke_width=2.5),
+    whiskers=gpar(stroke=NC"black", stroke_dash=(4, 2.5), stroke_width=1.0),
+    fences=gpar(stroke=NC"black", stroke_width=1.0),
+    outliers=gpar(marker="o", marker_fill=:none, marker_stroke=NC"black", marker_stroke_width=0.8, marker_size=6))
 render(boxplot2(data, style=style_base))
 
 # ggplot2
 style_ggplot = gpar(
     boxes=gpar(fill=NC"white", stroke=NC"black", stroke_width=1.0),
     medians=gpar(stroke=NC"black", stroke_width=1.5),
-    whiskers=gpar(stroke=NC"black"),
+    whiskers=gpar(stroke=NC"black", stroke_width=1.2),
     fences=gpar(stroke=:none),
     outliers=gpar(marker="o", marker_fill=NC"black"))
 bp = boxplot2(data, style=style_ggplot)
-bp.items[1].style
+render(bp)
 
-core_style = gpar(
-    boxes=gpar(fill=colors, stroke=gray, stroke_width=2, zorder=0.9),
-    whiskers=gpar(stroke=gray, stroke_width=2, stroke_dash=:none),
-    fences=gpar(stroke=gray, stroke_width=2),
-    medians=gpar(stroke=gray, stroke_width=2),
-    outliers=gpar(marker_fill=gray, marker="d", marker_stroke=gray, marker_size=5))
-#TODO: merge doesn't deal with sub dicts
-merge(core_style, style_ggplot)
+gparmerge(core_style, style_ggplot)

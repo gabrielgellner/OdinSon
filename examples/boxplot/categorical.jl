@@ -6,6 +6,21 @@ function gpar(;kwargs...)
     Dict{Symbol, Any}(kwargs)
 end
 
+# A recursive merge is needed to deal with nested dicts
+#TODO: this needs tests. It also might not do the write thing if one value is a dict, and the other is not.
+# though I am not sure this is even valid gpar specification
+#TODO: also I should have an inplace version
+function gparmerge(s1::Dict, s2::Dict)
+    snew = copy(s1)
+    for (k, v) in s2
+        if typeof(v) <: Dict && typeof(snew[k]) <: Dict
+            snew[k] = gparmerge(snew[k], v)
+        else
+            snew[k] = v
+        end
+    end
+    return snew
+end
 # can I make a simple function that does validation?
 
 # some utilities to convert OdinSon like parameter names to matplotlib names
@@ -205,16 +220,15 @@ function Boxplot(data; style=Dict{Symbol, Any}())
     colors = OdinSon.SEABORN_PALETTES[:deep]
     l = minimum([convert(HSL, convert(RGB{Float32}, color)).l for color in colors])
     gray = RGB(l*0.6, l*0.6, l*0.6)
-    #TODO: think of a better name for _style
-    _style = gpar(
+    #TODO: should this be moved to a global const?
+    core_style = gpar(
         boxes=gpar(fill=colors, stroke=gray, stroke_width=2, zorder=0.9),
         whiskers=gpar(stroke=gray, stroke_width=2, stroke_dash=:none),
         fences=gpar(stroke=gray, stroke_width=2),
         medians=gpar(stroke=gray, stroke_width=2),
         outliers=gpar(marker_fill=gray, marker="d", marker_stroke=gray, marker_size=5)
     )
-    merge!(_style, style)
-    return Boxplot(data, _style)
+    return Boxplot(data, gparmerge(core_style, style))
 end
 
 boxplot2(data; style=Dict{Symbol, Any}()) = AxesView([Boxplot(data, style=style)], Dict{Symbol, Any}())
