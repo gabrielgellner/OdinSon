@@ -75,3 +75,39 @@ bp = boxplot2(data, style=style_ggplot)
 render(bp)
 
 gparmerge(core_style, style_ggplot)
+
+axes = gpar(
+    bottom=gpar(
+        ticks=gpar(stroke=NC"black", stroke_width=1.0, labels=:none, padding=3),
+        stroke=NC"black",
+        stroke_width=1.0,
+        label=:none,
+        padding=3,
+        domain=(:all, :all) # not sure how to deal with the domain as they really need to come in pairs
+    ),
+    left=gpar(),
+    top=gpar(),
+    right=gpar(),
+    grid=gpar()
+)
+# a little verbose for some basic stuff
+gpar(bottom=gpar(label="Interaction Strength"), left=gpar(label="Stability"))
+gpar(bottom=gpar(domain=(-10, 10)), left=gpar(domain=(-5, 3)))
+
+type PlotAxes
+    items::Array
+    style::Dict
+end
+
+function Base.render(pa::PlotAxes)
+    f = figure()
+    ax = f[:add_suplot](111)
+    ax[:set_xlim](pa.style[:bottom][:domain])
+    ax[:set_ylim](pa.style[:left][:domain])
+    for loc in [:bottom, :top, :left, :right]
+        ax[:spines][loc][:set_color](pa.style[loc][:stroke])
+    end
+    if pa.style[:bottom][:ticks] != :none
+        pass
+    end
+end
