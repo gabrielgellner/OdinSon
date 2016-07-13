@@ -15,7 +15,7 @@ export quiver,quiverkey,rc,rc_context,rcdefaults,rgrids,savefig,sca,scatter,sci
 export semilogx,semilogy,set_cmap,setp,show,specgram,spectral,spring,spy,stackplot
 export stem,step,streamplot,subplot,subplot2grid,subplot_tool,subplots,subplots_adjust
 export summer,suptitle,table,text,thetagrids,tick_params,ticklabel_format,tight_layout
-export title,tricontour,tricontourf,tripcolor,triplot,twinx,twiny,vlines,waitforbuttonpress
+export title,tricontour,tricontourf,tripcolor,triplot,twinx,twiny,vlines
 export winter,xkcd,xlabel,xlim,xscale,xticks,ylabel,ylim,yscale,yticks
 # some nice utilities from PyPlot
 export @L_str
@@ -38,6 +38,7 @@ export @NC_str, @HC_str
 export set_palette, color_cycle
 
 include("util.jl")
+export despine!
 # setup the default styling
 _set_mpl_kws()
 
