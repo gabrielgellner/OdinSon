@@ -17,6 +17,8 @@ export stem,step,streamplot,subplot,subplot2grid,subplot_tool,subplots,subplots_
 export summer,suptitle,table,text,thetagrids,tick_params,ticklabel_format,tight_layout
 export title,tricontour,tricontourf,tripcolor,triplot,twinx,twiny,vlines
 export winter,xkcd,xlabel,xlim,xscale,xticks,ylabel,ylim,yscale,yticks
+# 3D exports
+export plot3D
 # some nice utilities from PyPlot
 export @L_str
 
