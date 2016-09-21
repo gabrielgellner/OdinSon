@@ -19,7 +19,7 @@ end
 # the order will matter ... or maybe I should have it return multiple
 color_defs = [svg_rgb, crayons, xkcd_rgb]
 
-function colorname2rgb(name::ASCIIString)
+function colorname2rgb(name::String)
     for def in color_defs
         if haskey(def, name)
             return parse(Colorant, def[name])
@@ -29,13 +29,13 @@ function colorname2rgb(name::ASCIIString)
 end
 
 #NC for Named Color
-macro NC_str(name::ASCIIString)
+macro NC_str(name::String)
     c = colorname2rgb(name)
     return :($c)
 end
 
 #HC for Hex Color
-macro HC_str(hexstr::ASCIIString)
+macro HC_str(hexstr::String)
     #TODO: test to ensure actually a hex string
     c = parse(Colorant, hexstr)
     return :($c)
