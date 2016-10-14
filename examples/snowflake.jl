@@ -28,7 +28,7 @@ function snowflake(pt)
     for i = 1:length(rots)
         poly = zeros(2, size(arg2, 1))
         for j = 1:size(arg2, 1)
-            poly[:, j] = rots[i] * arg2[j, :]'
+            poly[:, j] = rots[i] * arg2[j:j, :]'
         end
         out[i] = poly
     end
@@ -39,4 +39,4 @@ end
 
 pts = rand(Uniform(-1, 1), (rand(3:9), 2))
 flake = snowflake(pts)
-render(flake)
+OdinSon.render(flake)
